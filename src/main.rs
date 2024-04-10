@@ -1,8 +1,14 @@
-use speedy2d::window::WindowHandler;
+use speedy2d::{color::Color, window::WindowHandler, Graphics2D, Window};
 use vector::Vector;
 
 fn main() {
-    println!("Hello, world!");
+    let window: Window = Window::new_centered("Pendulum", (800, 400)).unwrap();
+
+    let win: MyWindowHandler = MyWindowHandler {
+        p: Pendulum::new(400.0, 0.0, 200.00),
+    };
+
+    window.run_loop(win);
 }
 
 struct Pendulum {
@@ -55,7 +61,16 @@ impl Pendulum {
         self.position.add(&self.origin);
     }
 
-    fn draw() {}
+    pub fn draw(&self, graphics: &mut Graphics2D) {
+        graphics.draw_line(
+            (self.origin.x, self.origin.y),
+            (self.position.x, self.position.y),
+            3.0,
+            Color::RED,
+        );
+
+        graphics.draw_circle((self.position.x, self.position.y), 30.0, Color::RED);
+    }
 }
 
 mod vector {
@@ -83,7 +98,9 @@ mod vector {
     }
 }
 
-struct MyWindowHandler {}
+struct MyWindowHandler {
+    p: Pendulum,
+}
 
 impl WindowHandler for MyWindowHandler {
     fn on_draw(
@@ -91,5 +108,11 @@ impl WindowHandler for MyWindowHandler {
         helper: &mut speedy2d::window::WindowHelper<()>,
         graphics: &mut speedy2d::Graphics2D,
     ) {
+        // Clear the screen every frame.
+        graphics.clear_screen(Color::from_rgb(0.8, 0.9, 1.0));
+        self.p.update();
+        self.p.draw(graphics);
+
+        helper.request_redraw();
     }
 }
